@@ -1,5 +1,5 @@
 # PUBGM-ESP-AIMBOT-PC-Gameloop
-Gameloop PC Pubg Mobile 0.19.0 ESP &amp; AIMBOT Hack using using BypaPH, bypasses process read/write restrictions.
+Gameloop PC Pubg Mobile 0.19.0 ESP &amp; AIMBOT Hack using BypaPH, bypasses process read/write restrictions.
 
 # Tools:
 - C#
