@@ -622,7 +622,7 @@ namespace PUBGMESP
         
         public static string GetEnemyState(PlayerData player)
         {
-            var state = Mem.ReadMemory<int>(player.Address + 1920);
+            var state = Mem.ReadMemory<int>(player.Address + 2056);
 
             switch (state)
             {
