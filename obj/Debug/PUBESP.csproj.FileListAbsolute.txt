@@ -1,0 +1,16 @@
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.csprojAssemblyReference.cache
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBGMESP.MainForm.resources
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.Properties.Resources.resources
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.csproj.GenerateResource.cache
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.csproj.CoreCompileInputs.cache
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.exe
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.pdb
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\PUBESP.exe.config
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\PUBESP.exe
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\PUBESP.pdb
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\GameOverlay.xml
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\SharpDX.Direct2D1.xml
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\SharpDX.DXGI.xml
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\bin\Debug\SharpDX.Mathematics.xml
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.csproj.Fody.CopyLocal.cache
+C:\Users\RAKAN\source\repos\NullCrypter\PUBGM-ESP-AIMBOT\obj\Debug\PUBESP.csproj.CopyComplete

@@ -9,6 +9,9 @@ using Rectangle = GameOverlay.Drawing.Rectangle;
 using RawVector2 = SharpDX.Mathematics.Interop.RawVector2;
 using ShpVector3 = SharpDX.Vector3;
 using ShpVector2 = SharpDX.Vector2;
+using System.Linq;
+using System.Runtime.InteropServices;
+
 namespace PUBGMESP
 {
     public interface IESPForm
@@ -46,6 +49,10 @@ namespace PUBGMESP
         // offset
         private int actorOffset, boneOffset, tmpOffset;
 
+        private float fClosestDist;
+        private long BestTargetUniqID = -1;
+        private static float deltamult = 8f;
+        private static float offset_check_result = 0f;
 
         public ESPForm(RECT rect, GameMemSearch ueSearch)
         {
@@ -122,79 +129,8 @@ namespace PUBGMESP
             gfx.ClearScene(_transparent);
             // Draw FPS
             //gfx.DrawTextWithBackground(_font, _red, _black, 10, 10, "FPS: " + gfx.FPS);
-            // Draw Menu
-            if (Settings.ShowMenu)
-            {
-                //gfx.FillRectangle(_menuBrush, 10f, _window.Height / 2 - 75, 180, _window.Height / 2 + 165);
-                DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 - 65), "  [ AM7 PUBG ] ");
-                DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 - 50), "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈");
-                DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 - 35), "ESP Menu");
-                if (Settings.PlayerESP)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 - 20), "Player ESP    (Num1) :  " + Settings.PlayerESP.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 - 20), "Player ESP    (Num1) :  " + Settings.PlayerESP.ToString());
-                }
-                if (Settings.PlayerBox)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 - 5), "Player Box    (Num2) :  " + Settings.PlayerBox.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 - 5), "Player Box    (Num2) :  " + Settings.PlayerBox.ToString());
-                }
-                if (Settings.PlayerBone)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 + 10), "Player Bone   (Num3) :  " + Settings.PlayerBone.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 10), "Player Bone   (Num3) :  " + Settings.PlayerBone.ToString());
-                }
-                if (Settings.PlayerLines)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 + 25), "Player Line   (Num4) :  " + Settings.PlayerLines.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 25), "Player Line   (Num4) :  " + Settings.PlayerLines.ToString());
-                }
-                if (Settings.PlayerHealth)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 + 40), "Player Health (Num5) :  " + Settings.PlayerHealth.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 40), "Player Health (Num5) :  " + Settings.PlayerHealth.ToString());
-                }
-                if (Settings.ItemESP)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 + 55), "Item ESP      (Num6) :  " + Settings.ItemESP.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 55), "Item ESP      (Num6) :  " + Settings.ItemESP.ToString());
-                }
-                if (Settings.VehicleESP)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 + 70), "Vehicle ESP   (Num7) :  " + Settings.VehicleESP.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 70), "Vehicle ESP   (Num7) :  " + Settings.VehicleESP.ToString());
-                }
-                if (Settings.Player3dBox)
-                {
-                    DrawShadowText(gfx, _font, _red, new Point(20f, _window.Height / 2 + 85), "Player 3D Box    (Num8) :  " + Settings.Player3dBox.ToString());
-                }
-                else
-                {
-                    DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 85), "Player 3D Box   (Num8) :  " + Settings.Player3dBox.ToString());
-                }
-                DrawShadowText(gfx, _font, _green, new Point(20f, _window.Height / 2 + 100), "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈");
-            }
+            
+
             if (_data.Players.Length > 0)
             {
                 playerCount = _data.Players.Length;
@@ -203,6 +139,7 @@ namespace PUBGMESP
             // Read View Matrix
             long viewMatrixAddr = Mem.ReadMemory<int>(Mem.ReadMemory<int>(_data.ViewMatrixBase) + 32) + 512;
             D3DMatrix viewMatrix = Algorithms.ReadViewMatrix(viewMatrixAddr);
+            float fClosestDist = -1;
             // Draw Player ESP
             if (Settings.PlayerESP)
             {
@@ -273,6 +210,7 @@ namespace PUBGMESP
                         }
                         if (Settings.PlayerHealth)
                         {
+
                             // Draw Health
                             DrawPlayerBlood((x - playerScreen.Z / 4) - 8, y - 5, h + 5, 3, player.Health);
                         }
@@ -282,7 +220,69 @@ namespace PUBGMESP
                             gfx.DrawLine(_white, new Line(_window.Width / 2, 0, x, y), 2);
                         }
                     }
+                    float ScreenCenterX = (float)_window.Width / 2f, ScreenCenterY = (float)_window.Height / 2f;
+
+                    if (Settings.aimEnabled)
+                    {
+                        long tmpAddv = Mem.ReadMemory<int>(player.Address + tmpOffset);
+                        long bodyAddv = tmpAddv + actorOffset;
+                        long boneAddv = Mem.ReadMemory<int>(tmpAddv + boneOffset) + 48;
+                        ShpVector3 headPos = Algorithms.GetBoneWorldPosition(bodyAddv, boneAddv + 5 * 48);
+
+                        headPos.Z += 7;
+
+                        var clampPos = headPos - player.Position;
+                        bool w2sHead = Algorithms.WorldToScreen3DBox(viewMatrix, new ShpVector3(headPos.X, headPos.Y - (Settings.bPredict * 2), headPos.Z - (Settings.bYAxis * 8)), out ShpVector2 HeadPosition, _window.Width, _window.Height);
+
+                        player.Screen2D = HeadPosition;
+                        player.CrosshairDistance = ShpVector2.Distance(HeadPosition, new ShpVector2(ScreenCenterX, ScreenCenterY));
+
+
+                        if (Algorithms.isInside(ScreenCenterX, ScreenCenterY, Settings.bFovArray[Settings.bFovInt], player.Screen2D.X, player.Screen2D.Y))
+                        {
+                            fClosestDist = player.CrosshairDistance;
+                            BestTargetUniqID = player.Address;
+                            player.IsIn = true;
+                        }
+
+
+                    }
+                    if (Settings.bDrawFow)
+                    {
+                        gfx.DrawCircle(_red, ScreenCenterX, ScreenCenterY, Settings.bFovArray[Settings.bFovInt], 1);
+                    }
                 }
+            }
+            if (MainForm.GetAsyncKeyState(Settings.bAimKeys[Settings.bAimKeyINT]))
+            {
+                if (BestTargetUniqID != -1)
+                {
+
+                    var aimTarget = (from x in _data.Players.ToList()
+                                     where x != null
+                                     where x.IsIn
+                                     orderby x.CrosshairDistance
+                                     select x).FirstOrDefault();
+                    if (aimTarget != null)
+                    {
+                        BestTargetUniqID = aimTarget.Address;
+                    }
+
+                    var best = FindAimTargetByUniqueID(_data.Players, BestTargetUniqID);
+
+                    if (best != null)
+                    {
+                        {
+                            var roundPos = new ShpVector2(best.Screen2D.X, best.Screen2D.Y);
+                            AimAtPosV2(roundPos.X, roundPos.Y);
+
+                        }
+                    }
+                }
+            }
+            else
+            {
+                BestTargetUniqID = -1;
             }
             // Draw Item ESP
             if (Settings.ItemESP)
@@ -335,6 +335,112 @@ namespace PUBGMESP
             }
             gfx.EndScene();
         }
+        private static PlayerData FindAimTargetByUniqueID(PlayerData[] array, long address)
+        {
+            var entityList = array;
+            for (int i = 0; i < entityList.Length; i++)
+            {
+                var current = entityList[i];
+                if (current == null)
+                    continue;
+
+                if (current.Address == address)
+                    return current;
+            }
+            return null;
+        }
+
+        private void AimAtPosV2(float x, float y)
+        {
+            int num = _window.Width / 2;
+            int num2 = _window.Height / 2;
+            float num3 = (float)Settings.bSmooth + 1f;
+            float num4 = 0f;
+            float num5 = 0f;
+            _graphics.DrawCircle(_white, x, y, 3f, 3f);
+            if (x != 0f)
+            {
+                if (x > (float)num)
+                {
+                    num4 = -((float)num - x);
+                    num4 /= num3;
+                    if (num4 + (float)num > (float)(num * 2))
+                    {
+                        num4 = 0f;
+                    }
+                }
+                if (x < (float)num)
+                {
+                    num4 = x - (float)num;
+                    num4 /= num3;
+                    if (num4 + (float)num < 0f)
+                    {
+                        num4 = 0f;
+                    }
+                }
+            }
+            if (y != 0f)
+            {
+                if (y > (float)num2)
+                {
+                    num5 = -((float)num2 - y);
+                    num5 /= num3;
+                    if (num5 + (float)num2 > (float)(num2 * 2))
+                    {
+                        num5 = 0f;
+                    }
+                }
+                if (y < (float)num2)
+                {
+                    num5 = y - (float)num2;
+                    num5 /= num3;
+                    if (num5 + (float)num2 < 0f)
+                    {
+                        num5 = 0f;
+                    }
+                }
+            }
+            if (Math.Abs(num4) < 1f)
+            {
+                if (num4 > 0f)
+                {
+                    deltamult = offset_check_result * 100f;
+                }
+                if (num4 < 0f)
+                {
+                    deltamult = offset_check_result * 10f;
+                }
+            }
+            if (Math.Abs(num5) < 1f)
+            {
+                if (num5 > 0f)
+                {
+                    deltamult = offset_check_result * 10f;
+                }
+                if (num5 < 0f)
+                {
+                    deltamult = offset_check_result * 10f;
+                }
+            }
+
+            MouseMove((int)num4, (int)num5);//, 0U, UIntPtr.Zero);
+        }
+        public static void MouseMove(int deltaX, int deltaY)
+        {
+            var mouseMoveInput = new Input
+            {
+                type = SendInputEventType.InputMouse,
+                mi =
+                {
+                    dwFlags = MouseEventFlags.MOUSEEVENTF_MOVE,
+                    dx = deltaX,
+                    dy = deltaY,
+                },
+            };
+            SendInput(1, ref mouseMoveInput, Marshal.SizeOf<Input>());
+        }
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint SendInput(uint nInputs, ref Input pInputs, int cbSize);
         private void Draw3DBox(D3DMatrix viewMatrix, PlayerData player, ShpVector3 playersc, int winWidth, int winHeight, float hei= 180f)
         {
             float num = 70f;
@@ -477,7 +583,7 @@ namespace PUBGMESP
                 && rKnee != null && lAnkle != null && rAnkle != null)
             {
 
-                _graphics.DrawCircle(_white, new Circle(head.X, head.Y, w / 6), 1);
+               // _graphics.DrawCircle(_white, new Circle(head.X, head.Y, w / 6), 1);
                 _graphics.DrawLine(_white, new Line(neck.X, neck.Y, chest.X, chest.Y), 1);
                 _graphics.DrawLine(_white, new Line(chest.X, chest.Y, pelvis.X, pelvis.Y), 1);
 
@@ -560,5 +666,61 @@ namespace PUBGMESP
                 _graphics.Height = e.Height;
             }
         }
+    }
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Input
+    {
+        [FieldOffset(0)] public SendInputEventType type;
+        [FieldOffset(4)] public MouseInput mi;
+        [FieldOffset(4)] public KeybdInput ki;
+        [FieldOffset(4)] public HardwareInput hi;
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HardwareInput
+    {
+        public int uMsg;
+        public short wParamL;
+        public short wParamH;
+    }
+    public enum SendInputEventType
+    {
+        InputMouse,
+        InputKeyboard,
+        InputHardware
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KeybdInput
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MouseInput
+    {
+        public int dx;
+        public int dy;
+        public uint mouseData;
+        public MouseEventFlags dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
+    [Flags]
+    public enum MouseEventFlags : uint
+    {
+        MOUSEEVENTF_MOVE = 0x0001,
+        MOUSEEVENTF_LEFTDOWN = 0x0002,
+        MOUSEEVENTF_LEFTUP = 0x0004,
+        MOUSEEVENTF_RIGHTDOWN = 0x0008,
+        MOUSEEVENTF_RIGHTUP = 0x0010,
+        MOUSEEVENTF_MIDDLEDOWN = 0x0020,
+        MOUSEEVENTF_MIDDLEUP = 0x0040,
+        MOUSEEVENTF_XDOWN = 0x0080,
+        MOUSEEVENTF_XUP = 0x0100,
+        MOUSEEVENTF_WHEEL = 0x0800,
+        MOUSEEVENTF_VIRTUALDESK = 0x4000,
+        MOUSEEVENTF_ABSOLUTE = 0x8000
     }
 }

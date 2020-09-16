@@ -40,6 +40,10 @@ namespace PUBGMESP
         public bool IsRobot;
         public int TeamID;
         public int IsTeam;
+        public ShpVector2 Screen2D;
+        public float CrosshairDistance;
+        public bool IsIn = false;
+        public ShpVector3 Position3D;
     }
 
     public class ItemData

@@ -25,7 +25,6 @@ namespace PUBGMESP
         SigScanSharp sigScan;
         GameMemSearch ueSearch;
         ESPForm espForm;
-        AimbotForm aimbotForm;
         #endregion
 
         #region Variables
@@ -55,6 +54,8 @@ namespace PUBGMESP
         public MainForm()
         {
             InitializeComponent();
+            txtAimKey.Text = "RButton";
+           
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -108,9 +109,7 @@ namespace PUBGMESP
                 UpdateTimer.Enabled = true;
                 GetWindowRect(hwnd, out rect);
                 espForm = new ESPForm(rect, ueSearch);
-                aimbotForm = new AimbotForm(rect, ueSearch);
                 new Thread(ESPThread).Start();
-                new Thread(AimbotThread).Start();
                 new Thread(InfoThread).Start();
                 Btn_Activate.Enabled = false;
                 Btn_Activate.Text = "Injected";
@@ -222,6 +221,18 @@ namespace PUBGMESP
                             continue;
                         }
                     }
+                    if(Settings.SpeedCar)
+                    {
+                        int ptrCarSpeed = Mem.ReadMemory<int>(Mem.ReadMemory<int>(Mem.ReadMemory<int>(Mem.ReadMemory<int>(Mem.ReadMemory<int>(uMyObject + 312) + 1648) + 1776) + 404) + 88);
+                        Mem.WriteMemory<float>(ptrCarSpeed, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 4, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 8, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 12, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 16, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 20, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 24, 350f);
+                        Mem.WriteMemory<float>(ptrCarSpeed + 28, 350f);
+                    }
                     if (Settings.ItemESP)
                     {
                         // check if this entity is item
@@ -283,7 +294,6 @@ namespace PUBGMESP
                 data.Boxes = boxList.ToArray();
                 data.Grenades = grenadeList.ToArray();
                 espForm.UpdateData(data);
-                aimbotForm.UpdateData(data);
                 Thread.Sleep(10);
             }
         }
@@ -294,18 +304,10 @@ namespace PUBGMESP
             while (true)
             {
                 espForm.Update();
-                //Thread.Sleep(10);
+                Thread.Sleep(10);
             }
         }
-        private void AimbotThread()
-        {
-            aimbotForm.Initialize();
-            while (true)
-            {
-                aimbotForm.Update();
-                //Thread.Sleep(10);
-            }
-        }
+     
         private IntPtr FindTrueAOWHandle()
         {
             IntPtr aowHandle = IntPtr.Zero;
@@ -461,66 +463,12 @@ namespace PUBGMESP
             {
                 espForm._window.FitToWindow(hwnd, true);
             }
-            if (aimbotForm != null)
-            {
-                aimbotForm._window.FitToWindow(hwnd, true);
-            }
+ 
         }
 
         private void Update_Tick(object sender, EventArgs e)
         {
-            if (GetAsyncKeyState(Keys.End))
-            {
-                System.Environment.Exit(-1);
-            }
-            if (GetAsyncKeyState(Keys.End))
-            {
-                this.Close();
-            }
-            if (GetAsyncKeyState(Keys.Home))
-            {
-                Settings.ShowMenu = !Settings.ShowMenu;
-            }
-            if (GetAsyncKeyState(Keys.NumPad1))
-            {
-                Settings.PlayerESP = !Settings.PlayerESP;
-            }
-            if (GetAsyncKeyState(Keys.NumPad2))
-            {
-                Settings.PlayerBox = !Settings.PlayerBox;
-            }
-            if (GetAsyncKeyState(Keys.NumPad3))
-            {
-                Settings.PlayerBone = !Settings.PlayerBone;
-            }
-            if (GetAsyncKeyState(Keys.NumPad4))
-            {
-                Settings.PlayerLines = !Settings.PlayerLines;
-            }
-            if (GetAsyncKeyState(Keys.NumPad5))
-            {
-                Settings.PlayerHealth = !Settings.PlayerHealth;
-            }
-            if (GetAsyncKeyState(Keys.NumPad6))
-            {
-                Settings.ItemESP = !Settings.ItemESP;
-            }
-            if (GetAsyncKeyState(Keys.NumPad7))
-            {
-                Settings.VehicleESP = !Settings.VehicleESP;
-            }
-            if (GetAsyncKeyState(Keys.NumPad8))
-            {
-                Settings.Player3dBox = !Settings.Player3dBox;
-            }
-            if (GetAsyncKeyState(Keys.F5))
-            {
-                Settings.aimEnabled = !Settings.aimEnabled;
-            }
-            if (GetAsyncKeyState(Keys.F6))
-            {
-                Settings.bDrawFow = !Settings.bDrawFow;
-            }
+            
         }
         [DllImport("user32.dll")]
         public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
@@ -529,6 +477,55 @@ namespace PUBGMESP
         {
             // Stop ESP
             System.Environment.Exit(-1);
+        }
+
+        private void CheckBox_Changed(object sender, EventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+           
+            if(checkBox == chk2DBox)
+            {
+                Settings.PlayerBox = checkBox.Checked;
+            } 
+            else if(checkBox == chkBone)
+            {
+                Settings.PlayerBone = checkBox.Checked;
+            }
+            else if(checkBox == chkLines)
+            {
+                Settings.PlayerLines = checkBox.Checked;
+            }
+            else if(checkBox == chkHealth)
+            {
+                Settings.PlayerHealth = checkBox.Checked;
+            }
+            else if(checkBox == chkItems)
+            {
+                Settings.ItemESP = checkBox.Checked;
+            }
+            else if(checkBox == chkVehicle)
+            {
+                Settings.VehicleESP = checkBox.Checked;
+            }
+            else if(checkBox == chkAimbot)
+            {
+                Settings.aimEnabled = checkBox.Checked;
+            }
+            else if(checkBox == chkDrawFOV)
+            {
+                Settings.bDrawFow = checkBox.Checked;
+            }
+            else if(checkBox == chkFastLanding)
+            {
+                Settings.FastLanding = checkBox.Checked;
+            }
+
+
+        }
+
+        private void AimKeyCombo_Changed(object sender, EventArgs e)
+        {
+
         }
     }
 }
